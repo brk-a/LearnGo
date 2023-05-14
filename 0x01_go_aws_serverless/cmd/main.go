@@ -12,9 +12,9 @@ import (
 	"github.com/brk-a/LearnGo/0x01_go_aws_serverless/pkg/handlers"
 )
 
-var(
+var (
 	dynaClient dynamodbiface.DynamoDBAPI
-	handlers func
+	// handlers func
 )
 
 func main() {
