@@ -1,4 +1,4 @@
-package main
+package handlers
 
 func api_response() {
 
