@@ -47,7 +47,7 @@ func GetAllTodos()([]Todo, error){
 }
 
 func GetTodo(id uint64) (Todo, error) {
-	statement := `select *todo, done from todos where id=$1;`
+	statement := `select todo, done from todos where id=$1;`
 	todo := Todo{}
 	todo.Id = id
 
