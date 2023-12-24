@@ -4,6 +4,10 @@ import (
 	"fmt"
 )
 
+func startTextio()  {
+	fmt.Println("starting Textio server...")
+}
+
 func main()  {
-	fmt.Println("starting Textio server")
+	startTextio()
 }
