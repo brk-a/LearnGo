@@ -36,7 +36,7 @@ func main()  {
 	test(msg, badWords)
 
 	badWords = []string {"fuck", "shit", "there"}
-	msg = []string {"that", "right", "there", ",", "is", "shit"}
+	msg = []string {"that", ",", "right", "there", ",", "is", "shit"}
 	test(msg, badWords)
 
 	badWords = []string {"fuck", "shit"}
