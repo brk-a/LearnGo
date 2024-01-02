@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"sort"
 )
 
 func deleteIfNecessary(users map[string]user, name string) (deleted bool, err error) {
@@ -86,4 +87,15 @@ func main()  {
 	test(users, "Goat Matata")
 	test(users, "Kaka Mbweha")
 	test(users, "Bi Buibui")
+
+	keys := []string{}
+	for name := range users {
+		keys = append(keys, name)
+	}
+	sort.Strings(keys)
+
+	fmt.Println("Final map keys:")
+	for _, name := range keys {
+		fmt.Println(" - ", name)
+	}
 }
