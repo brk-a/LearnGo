@@ -2,7 +2,13 @@ package main
 
 import "fmt"
 
-func printReports(message []string) {}
+func printReports(messages []string) {
+	for _, message:= range messages {
+		printCostReport(func(i string) int {
+			return len(i) * 2
+		}, message)
+	}
+}
 
 func test(messages []string) {
 	defer fmt.Println("========================================================")
