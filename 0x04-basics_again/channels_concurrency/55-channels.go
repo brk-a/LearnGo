@@ -10,7 +10,7 @@ func pingPong(numPings int)  {
 	pongs := make(chan struct{})
 
 	go ponger(pings, pongs)
-	go pinger(pings, pongs,numPings)
+	pinger(pings, pongs,numPings)
 }
 
 func pinger(pings, pongs chan struct{}, numPings int)  {
