@@ -1,14 +1,16 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/brk-a/0x05-rss-feeds/internal/database"
-	"github.com/go-chi/cors"
 	"github.com/go-chi/chi"
+	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 type apiConfig struct {
@@ -21,6 +23,20 @@ func main() {
 	portString := os.Getenv("PORT")
 	if portString=="" {
 		log.Fatal("port could not be found in env")
+	}
+
+	dbUrlString := os.Getenv("DB_URL")
+	if dbUrlString=="" {
+		log.Fatal("db URL could not be found in env")
+	}
+
+	conn, err := sql.Open("postgres", dbUrlString)
+	if err!=nil {
+		log.Fatal("could not connect to database", err)
+	}
+
+	apiCfg := apiConfig{
+		DB: database.new(conn),
 	}
 
 	router := chi.NewRouter()
