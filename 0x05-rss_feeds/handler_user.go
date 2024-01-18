@@ -33,5 +33,14 @@ func (apiCfg apiConfig)handlerCreateUser(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	respondWithJSON(w, 200, databaseUserToUser(user))
+	respondWithJSON(w, 201, databaseUserToUser(user))
+}
+
+func (apiCfg apiConfig)handlerGetUserByAPIKey(w http.ResponseWriter, r *http.Request) {
+	apiKey, err := auth.GetAPIKey(r.Header)
+	if err!=nil {
+		respondWithError(w, 403, fmt.Sprintf("cannot fetch API key: %v", err))
+	}
+
+	apiCfg.DB.GetUserByAPIKey(r.Context(), apiKey)
 }
