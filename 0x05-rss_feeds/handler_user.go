@@ -11,7 +11,7 @@ import (
 
 func (apiCfg apiConfig)handlerCreateUser(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
-		Name string `json:name`
+		Name string `json:"name"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -23,7 +23,7 @@ func (apiCfg apiConfig)handlerCreateUser(w http.ResponseWriter, r *http.Request)
 	}
 
 	user, err := apiCfg.DB.CreateUser(r.Context(), database.CreateUserParams{
-		Id: uuid.New(),
+		ID: uuid.New(),
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
 		Name: params.Name,
@@ -36,15 +36,6 @@ func (apiCfg apiConfig)handlerCreateUser(w http.ResponseWriter, r *http.Request)
 	respondWithJSON(w, 201, databaseUserToUser(user))
 }
 
-func (apiCfg apiConfig)handlerGetUserByAPIKey(w http.ResponseWriter, r *http.Request) {
-	apiKey, err := auth.GetAPIKey(r.Header)
-	if err!=nil {
-		respondWithError(w, 403, fmt.Sprintf("cannot fetch API key: %v", err))
-	}
-
-	user, err := apiCfg.DB.GetUserByAPIKey(r.Context(), apiKey)
-	if err!=nil {
-		respondWithError(w, 400, fmt.Sprintf("cannot get user: %v", err))
-	}
+func (apiCfg apiConfig)handlerGetUserByAPIKey(w http.ResponseWriter, r *http.Request, user database.User) {
 	respondWithJSON(w, 200, databaseUserToUser(user))
 }
