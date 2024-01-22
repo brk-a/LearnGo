@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (apiCfg apiConfig)handlerCreateUser(w http.ResponseWriter, r *http.Request) {
+func (apiCfg *apiConfig)handlerCreateUser(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Name string `json:"name"`
 	}
@@ -36,6 +36,6 @@ func (apiCfg apiConfig)handlerCreateUser(w http.ResponseWriter, r *http.Request)
 	respondWithJSON(w, 201, databaseUserToUser(user))
 }
 
-func (apiCfg apiConfig)handlerGetUserByAPIKey(w http.ResponseWriter, r *http.Request, user database.User) {
+func (apiCfg *apiConfig)handlerGetUserByAPIKey(w http.ResponseWriter, r *http.Request, user database.User) {
 	respondWithJSON(w, 200, databaseUserToUser(user))
 }
