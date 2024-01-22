@@ -10,7 +10,7 @@ import (
 	"github.com/brk-a/0x05-rss-feeds/internal/database"
 )
 
-func (apiCfg apiConfig)handlerCreateFeed(w http.ResponseWriter, r *http.Request, user database.User) {
+func (apiCfg *apiConfig)handlerCreateFeed(w http.ResponseWriter, r *http.Request, user database.User) {
 	type parameters struct {
 		Name string `json:"name"`
 		URL string `json:"url"`
@@ -40,7 +40,7 @@ func (apiCfg apiConfig)handlerCreateFeed(w http.ResponseWriter, r *http.Request,
 	respondWithJSON(w, 201, databaseFeedToFeed(feed))
 }
 
-func (apiCfg apiConfig)handlerGetAllFeeds(w http.ResponseWriter, r *http.Request) {
+func (apiCfg *apiConfig)handlerGetAllFeeds(w http.ResponseWriter, r *http.Request) {
 	feeds, err := apiCfg.DB.GetAllFeeds(r.Context())
 	if err!=nil {
 		respondWithError(w, 400, fmt.Sprintf("cannot get feeds %v", err))
