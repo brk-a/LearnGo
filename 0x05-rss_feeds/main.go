@@ -35,9 +35,12 @@ func main() {
 		log.Fatal("could not connect to database", err)
 	}
 
+	db := database.New(conn)
 	apiCfg := apiConfig{
-		DB: database.new(conn),
+		DB: db,
 	}
+
+	go startScraping(db, 30, time.Minute)
 
 	router := chi.NewRouter()
 	router.Use(cors.Handler(cors.Options{
