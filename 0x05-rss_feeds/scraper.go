@@ -8,7 +8,7 @@ import (
 	"github.com/brk-a/0x05-rss-feeds/internal/database"
 )
 
-func startScraping(db *database.Queries, concurrency int, timeBetweenRequests tome.Duration)  {
+func startScraping(db *database.Queries, concurrency int, timeBetweenRequests time.Duration)  {
 	log.Printf("scraping on %v goroutines every %v long", concurrency, timeBetweenRequests)
 	ticker := time.NewTicker(timeBetweenRequests)
 	for ;;<-ticker.C {
@@ -43,7 +43,7 @@ func scrapeFeed(db *database.Queries, wg *sync.WaitGroup, feed database.Feed)  {
 	}
 
 	for _, item:=range rssFeed.Channel.Item {
-		log.Println("found post")
+		log.Println("found post", item.Title, "on feed", feed.Name)
 	}
 	log.Printf("feed %v collected. %v posts found", feed.Name, len(rssFeed.Channel.Item))
 }
