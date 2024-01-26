@@ -43,7 +43,31 @@ func scrapeFeed(db *database.Queries, wg *sync.WaitGroup, feed database.Feed)  {
 	}
 
 	for _, item:=range rssFeed.Channel.Item {
-		log.Println("found post", item.Title, "on feed", feed.Name)
+		description := sql.NullString{}
+		if item.Description!="" {
+			description.String = item.Description
+			description.Valid = true
+		}
+
+		pubDate, err := time.Parse(time.RFC1123Z, item.PubDate)
+		if err!=nil {
+			log.Printf("error parsing pub date %v with error %v", item.PubDate, err)
+			continue
+		}
+
+		_, err := db.CreatePosts(context.Background(), database.CreatePostsParams{
+			ID: uuid.New(),
+			CreatedAt: time.Now().UTC(),
+			UpdatedAt: time.Now().UTC(),
+			PublishedAt: pubDate,
+			Title: item.Title,
+			Description: description
+			Url: item.Link,
+			FeedId: feed.ID,
+		})
+		if err!=nil {
+			log.Println("error creating post: ", err)
+		}
 	}
 	log.Printf("feed %v collected. %v posts found", feed.Name, len(rssFeed.Channel.Item))
 }
