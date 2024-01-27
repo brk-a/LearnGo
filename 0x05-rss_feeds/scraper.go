@@ -66,6 +66,9 @@ func scrapeFeed(db *database.Queries, wg *sync.WaitGroup, feed database.Feed)  {
 			FeedId: feed.ID,
 		})
 		if err!=nil {
+			if strings.Contains(err.Error(), "duplicate key") {
+				continue
+			}
 			log.Println("error creating post: ", err)
 		}
 	}
