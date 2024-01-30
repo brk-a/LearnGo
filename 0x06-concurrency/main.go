@@ -5,4 +5,5 @@ func main()  {
 	primitivesChannels()
 	primitivesSelect()
 	forSelectLoop()
+	doneChannel()
 }
