@@ -6,4 +6,5 @@ func main()  {
 	primitivesSelect()
 	forSelectLoop()
 	doneChannel()
+	pipeline()
 }
