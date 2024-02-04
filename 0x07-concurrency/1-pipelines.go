@@ -31,7 +31,7 @@ func primeFinder(done <-chan int, randIntStream <-chan int) <-chan int {
 		}
 	}()
 
-	 return primes
+	return primes
 }
 
 func take[T any, K any](done <-chan K, stream <-chan T, n  int) <-chan T {
@@ -63,5 +63,5 @@ func runTake() {
 		fmt.Println(i)
 	}
 
-	fmt.Printf("operation takes %v", time.Since(start))
+	fmt.Printf("naive approach takes %v\n", time.Since(start))
 }
