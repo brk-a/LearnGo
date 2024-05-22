@@ -37,7 +37,7 @@ func GetAllTodos()([]Todo, error){
 
 		todo := Todo{
 			Id: id,
-			Todo: todo,
+			Todo: title,
 			Done: done,
 		}
 		todos = append(todos, todo)
@@ -60,7 +60,7 @@ func GetTodo(id uint64) (Todo, error) {
 		var title string
 		var done bool
 
-		error := row.Scan(&title, &done)
+		err := row.Scan(&title, &done)
 		if err!=nil {
 			return todo, err
 		}
@@ -73,12 +73,12 @@ func GetTodo(id uint64) (Todo, error) {
 }
 
 func UpdateTodo(id uint64, item string) error {
-	todo, err := GetTodo(id)
+	_, err := GetTodo(id)
 	if err!=nil {
 		return err
 	}
 
-	statement = `update todos set todo=$2 where id=$1;`
+	statement := `update todos set todo=$2 where id=$1;`
 	_, err := db.Query(statement, id, item)
 
 	return err
