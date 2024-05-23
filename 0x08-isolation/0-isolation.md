@@ -43,7 +43,7 @@
         docker exec -it mysql8 mysql -uroot -ppassword123 fnbank
     ```
 
-* in the mySQL environment, run the following
+* in the mySQL terminal, run the following
 
     ```mysql
         select @@trasaction_isolation;
@@ -52,7 +52,18 @@
     ```
 
 * you can set the isolation level you want
-* 
+* see code in [0-isolation.sh][def]
+* notice that the second terminal/session sees the balance as KES 90.00 even though the transactions in the first session have not been committed; this is a *dirty read*
+* we eliminate dirty reads by raising the isolation above *read uncommitted*
+* notice that in the second session, the query to find `account 1`'s balance returns 90.00 before the transaction in the first session is committed and returns 80.00 KES after said transaction is committed; this is a *non-repeatable read*
+* notice that in the second session, the query to find accounts whose balance is greater than 90.00 returns three rows before the transaction in the first session is committed and returns two after said transaction is committed; this is a *phantom read*
+* we eliminate non-repeatable and phantom reads by raising the isolation level above *read committed*
+* notice, from session 2's perspective, that the balance seems to be inconsistent/incorrect: 80 less 10 is 70, not 60. this *is* an inconsistency; session one subtracts 10 from 80: balance is 70. session 2 does not interfere with session 1's transaction but cannot read the updated value. session 2 subtracts 10 from 70: balance is 60. session 1 does not interfere with session 2's transaction  but cannot read the updated value.this is how MySQL implements read repeatable isolation
+* notice, when we subtract 10 from account 1 after setting isolation level to *serialisable*, that the query blocks. the reason is, in *serialisable* isolation level, MySQL implicitly all plain `SELECT` queries to `SELECT FOR SHARE`. a transaction that holds a `SELECT FOR SHARE` only allows other transactions to **read**, not **update** or **delete** rows
+* this locking mechanism  eliminates the inconsistency we saw during the transaction at the *read repeatable* level
+* said lock, however, has a time-out duration; if the second transaction does not commit or roll back to release the lock w/i that duration,a *LOCK WAIT TIMEOUT* error is returned
+* in this case, retry the first transaction
+    - always implement a transaction retry strategy
 
     ||read uncommitted|read committed|read repeatable|serialisable|
     |:---:|:---:|:---:|:---:|:---:|
@@ -69,3 +80,5 @@
     |non-repeatable|||||
     |phantom read|||||
     |serialisation anomaly|||||
+
+[def]: ./0-isolation.sh
