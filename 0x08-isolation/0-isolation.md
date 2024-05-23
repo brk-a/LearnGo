@@ -1,5 +1,5 @@
 # isolation
-* the thrid property in ACID
+* the third property in ACID
     - Atomicity &rarr; all operations in a transaction either complete or the whole transaction fails
     - Concurrency &rarr; the state of the db must be valid after a transaction completes or fails; all constraints must be satisfied
     - Isolation &rarr; concurrent transactions must not affect each other
@@ -59,26 +59,43 @@
 * notice that in the second session, the query to find accounts whose balance is greater than 90.00 returns three rows before the transaction in the first session is committed and returns two after said transaction is committed; this is a *phantom read*
 * we eliminate non-repeatable and phantom reads by raising the isolation level above *read committed*
 * notice, from session 2's perspective, that the balance seems to be inconsistent/incorrect: 80 less 10 is 70, not 60. this *is* an inconsistency; session one subtracts 10 from 80: balance is 70. session 2 does not interfere with session 1's transaction but cannot read the updated value. session 2 subtracts 10 from 70: balance is 60. session 1 does not interfere with session 2's transaction  but cannot read the updated value.this is how MySQL implements read repeatable isolation
-* notice, when we subtract 10 from account 1 after setting isolation level to *serialisable*, that the query blocks. the reason is, in *serialisable* isolation level, MySQL implicitly all plain `SELECT` queries to `SELECT FOR SHARE`. a transaction that holds a `SELECT FOR SHARE` only allows other transactions to **read**, not **update** or **delete** rows
+* notice, when we subtract 10 from account 1 after setting isolation level to *serialisable*, that the query blocks. the reason is, in *serialisable* isolation level, MySQL implicitly turns all plain `SELECT` queries to `SELECT FOR SHARE`. a transaction that holds a `SELECT FOR SHARE` only allows other transactions to **read**, not **update** or **delete** rows
 * this locking mechanism  eliminates the inconsistency we saw during the transaction at the *read repeatable* level
 * said lock, however, has a time-out duration; if the second transaction does not commit or roll back to release the lock w/i that duration,a *LOCK WAIT TIMEOUT* error is returned
 * in this case, retry the first transaction
     - always implement a transaction retry strategy
 
-    ||read uncommitted|read committed|read repeatable|serialisable|
+    |phenomenon|read uncommitted|read committed|read repeatable|serialisable|
     |:---:|:---:|:---:|:---:|:---:|
-    |dirty read|||||
-    |non-repeatable|||||
-    |phantom read|||||
-    |serialisation anomaly|||||
+    |dirty read|possible|not possible|not possible|not possible|
+    |non-repeatable|possible|possible|not possible|not possible|
+    |phantom read|possible|possible|not possible|not possible|
+    |serialisation anomaly|possible|possible|possible|not possible|
 
 #### postgres
+* see code in [1-isolation.sh][def2]
+* you expect to see a dirty read from a transaction that has been carried out under *read uncommitted*; according to [postgres' documentation][def3], read uncommitted behaves like read committed
+    > PostgreSQL's Read Uncommitted mode behaves like Read Committed. This is because it is the only sensible way to
+    > map the standard isolation levels to PostgreSQL's multiversion concurrency control architecture
+* *read uncommitted* works the same as in MySQL
+* *repeatable read* mode works as expected: session 2 cannot update the table because session 1 holds the dependencies required according to postgres' dependency checking mechanism
+* *serializable* mode works as expected: session 2 cannot create a new record in the table because session 1 has the dependencies required
 
-    ||read uncommitted|read committed|read repeatable|serialisable|
+    |phenomenon|read uncommitted|read committed|read repeatable|serialisable|
     |:---:|:---:|:---:|:---:|:---:|
-    |dirty read|||||
-    |non-repeatable|||||
-    |phantom read|||||
-    |serialisation anomaly|||||
+    |dirty read||allowed but not in postgres|not possible|not possible|
+    |non-repeatable|possible|not possible|not possible|not possible|
+    |phantom read|possible|possible|allowed but not in postgres|not possible|
+    |serialisation anomaly|possible|possible|possible|not possible|
+
+* MySQL uses a locking mechanism; postgres uses a dependency detection mechanism (postgres' way is superior)
+* *read uncommitted* behaves the same as *read committed* in postgresql
+    - technically, postgres has three isolation levels
+* default isolation level in postgres is *read committed*; MySQL has *repeatable read* (MySQL is superior from a security perspective)
+* always have a retry mechanism when you are on higher isolation levels
+* RTFM
+* 
 
 [def]: ./0-isolation.sh
+[def2]: ./1-isolation.sh
+[def3]: https://www.postgresql.org/docs/current/transaction-iso.html
