@@ -3,9 +3,9 @@ package main
 import (
 	"os"
 	"github.com/gin-gonic/gin"
-	"restaurant_managment_system/database"
-	"restaurant_managment_system/routes"
-	"restaurant_managment_system/middleware"
+	"restaurant_management_system/database"
+	"restaurant_management_system/routes"
+	"restaurant_management_system/middleware"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
