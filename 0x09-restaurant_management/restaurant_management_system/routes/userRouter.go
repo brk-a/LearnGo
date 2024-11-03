@@ -13,3 +13,5 @@ func UserRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.POST("/users/signin", controller.SignIn())
 	// incomingRoutes.PUT("/users/:user_id", controllers.UpdateUser());
 }
+
+// TODO: create auth middleware/module etc
