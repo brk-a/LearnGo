@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"restaurant_management_system/database"
+	"restaurant_management_system/helpers"
 	"restaurant_management_system/models"
 	"time"
 
@@ -85,6 +86,7 @@ func CreateMenu() gin.HandlerFunc {
 		defer cancel()
 
 		c.JSON(http.StatusOK, result)
+		defer cancel()
 	}
 }
 
@@ -103,7 +105,7 @@ func UpdateMenu() gin.HandlerFunc {
 		var updateObj primitive.D
 
 		if menu.Start_date != nil && menu.End_date != nil {
-			if !inTimeSpan(*menu.Start_date, *menu.End_date, time.Now()) {
+			if !helpers.InTimeSpan(*menu.Start_date, *menu.End_date, time.Now()) {
 				msg := fmt.Sprintf("error in time stamp(s)")
 				c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
 				defer cancel()
@@ -134,12 +136,12 @@ func UpdateMenu() gin.HandlerFunc {
                 },
                 &opt,
             )
-
             if err != nil {
                 msg := fmt.Sprintf("error updating menu")
                 c.JSON(http.StatusInternalServerError, msg)
                 return
             }
+			
             defer cancel()
             c.JSON(http.StatusOK, result)
 		}

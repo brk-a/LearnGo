@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"restaurant_management_system/database"
 	"restaurant_management_system/models"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -19,7 +20,24 @@ var foodCollection *mongo.Collection = database.OpenCollection(database.Client, 
 var validate = validator.New("validate", validator.BakedInValidators)
 
 func GetFoods() gin.HandlerFunc {
-	return func(c *gin.Context) {}
+	return func(c *gin.Context) {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		var allFoods []models.Food
+		recordsPerPage, err := strconv.Atoi(c.Query("recordPerPage"))
+		if err!= nil || recordsPerPage<1 {
+            recordsPerPage = 10
+        }
+		page, err := strconv.Atoi(c.Query("page"))
+		if err!= nil || page<1 {
+            page = 1
+        }
+		skip := (page - 1) * recordsPerPage
+		skip, err = strconv.Atoi(c.Query("skip"))
+
+		matchStage := bson.D{{"$match", bson.D{{}}}}
+		groupStage := bson.D{{"$group", bson.D{{"_id", bson.D{{"_id", "null"}}}, {"total_count", bson.D{{"$sum, 1"}}},}}}
+		projectStage := 
+	}
 }
 
 func GetFood() gin.HandlerFunc {
