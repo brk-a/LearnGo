@@ -33,7 +33,7 @@ func GetMenus() gin.HandlerFunc {
 		var allMenus []bson.M
 		if err = result.All(ctx, &allMenus); err != nil {
 			log.Fatal(err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "error decoding results"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "error decoding menus"})
 			return
 		}
 
@@ -131,14 +131,14 @@ func UpdateMenu() gin.HandlerFunc {
             result, err := menuCollection.UpdateOne(
                 ctx,
                 filter,
-                bson.D{
-                    {"$set", updateObj},
+                bson.M{
+                    "$set": updateObj,
                 },
                 &opt,
             )
             if err != nil {
                 msg := fmt.Sprintf("error updating menu")
-                c.JSON(http.StatusInternalServerError, msg)
+                c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
                 return
             }
 			
