@@ -3,10 +3,8 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"restaurant_management_system/database"
-	"restaurant_management_system/helpers"
 	"restaurant_management_system/models"
 	"time"
 
