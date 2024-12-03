@@ -111,3 +111,7 @@ func UpdateOrder() gin.HandlerFunc {
         c.JSON(http.StatusOK, result)
     }
 }
+
+func DeleteOrder() gin.HandlerFunc {
+    return func(c *gin.Context) {}
+}
