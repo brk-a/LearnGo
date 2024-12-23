@@ -43,11 +43,11 @@ func GetFoods() gin.HandlerFunc {
 			"$group", bson.D{
 				{"_id", bson.D{{"_id", "null"}}},
 				{"total_count", bson.D{{"$sum", 1}}},
-				{"$data", bson.D{{"$push", "$$ROOT"}}},
+				{"data", bson.D{{"$push", "$$ROOT"}}},
 			},
 		}}
 		projectStage := bson.D{{
-			"project", bson.D{
+			"$project", bson.D{
 				{"_id", 0},
 				{"total_count", 1},
 				{"food_items", bson.D{{"$slice", []interface{}{"$data", skip, recordsPerPage}}}},
@@ -55,9 +55,7 @@ func GetFoods() gin.HandlerFunc {
 		}}
 
 		result, err := foodCollection.Aggregate(ctx, mongo.Pipeline{
-			matchStage,
-			groupStage,
-			projectStage,
+			matchStage, groupStage, projectStage,
 		})
 		defer cancel()
 		if err != nil {
