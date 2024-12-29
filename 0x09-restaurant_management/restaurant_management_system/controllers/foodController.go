@@ -16,7 +16,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"gopkg.in/bluesuncorp/validator.v5"
-	"gopkg.in/mgo.v2/bson"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 var foodCollection *mongo.Collection = database.OpenCollection(database.Client, "food")
@@ -94,6 +94,7 @@ func CreateFood() gin.HandlerFunc {
 		var food models.Food
 		var menu models.Menu
 
+		defer cancel()
 		if err := c.BindJSON(&food); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
@@ -138,25 +139,25 @@ func UpdateFood() gin.HandlerFunc {
 		var menu models.Menu
 
 		foodId := c.Param("food_id")
+		defer cancel()
 		if err := c.BindJSON(&food); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-
-		menuId := c.Param("menu_id")
+ 
 		filter := bson.M{"food_id": foodId}
 		var updateObj primitive.D
 		if food.Name != nil {
 			updateObj = append(updateObj, bson.E{"name", food.Name})
 		}
 		if food.Price != nil {
-			updateObj = append(updateObj, bson.E{"price", *food.Price})
+			updateObj = append(updateObj, bson.E{"price", food.Price})
 		}
 		if food.Food_image != nil {
 			updateObj = append(updateObj, bson.E{"food_image", food.Food_image})
 		}
 		if food.Menu_id != nil {
-			err := menuCollection.FindOne(ctx, bson.M{"menu_id": menuId}).Decode(&menu)
+			err := menuCollection.FindOne(ctx, bson.M{"menu_id": food.Menu_id}).Decode(&menu)
 			defer cancel()
 			if err!=nil{
 				msg := fmt.Sprintf("error finding menu")
@@ -193,10 +194,21 @@ func UpdateFood() gin.HandlerFunc {
 	}
 }
 
-// func round(num float64) int {
-// 	return int(num)
-// }
+func DeleteFood() gin.HandlerFunc {
+	return func(c *gin.Context) {
+        var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+        foodId := c.Param("food_id")
 
-// func toFixed(num float64, precision int) float64 {
-// 	return float64(num)
-// }
+        filter := bson.M{"food_id": foodId}
+        result, err := foodCollection.DeleteOne(ctx, filter)
+        defer cancel()
+        if err!= nil {
+            msg := fmt.Sprintf("error deleting food")
+            c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
+            return
+        }
+
+		defer cancel()
+        c.JSON(http.StatusOK, result)
+    }
+}
