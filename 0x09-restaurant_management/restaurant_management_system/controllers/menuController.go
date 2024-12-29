@@ -11,10 +11,10 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"gopkg.in/mgo.v2/bson"
 )
 
 var menuCollection *mongo.Collection = database.OpenCollection(database.Client, "menu")
@@ -125,25 +125,49 @@ func UpdateMenu() gin.HandlerFunc {
 
 			upsert := true
 			opt := options.UpdateOptions{
-                Upsert: &upsert,
-            }
+				Upsert: &upsert,
+			}
 
-            result, err := menuCollection.UpdateOne(
-                ctx,
-                filter,
-                bson.M{
-                    "$set": updateObj,
-                },
-                &opt,
-            )
-            if err != nil {
-                msg := fmt.Sprintf("error updating menu")
-                c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
-                return
-            }
-			
-            defer cancel()
-            c.JSON(http.StatusOK, result)
+			result, err := menuCollection.UpdateOne(
+				ctx,
+				filter,
+				bson.M{
+					"$set": updateObj,
+				},
+				&opt,
+			)
+			if err != nil {
+				msg := fmt.Sprintf("error updating menu")
+				c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
+				return
+			}
+
+			defer cancel()
+			c.JSON(http.StatusOK, result)
 		}
+	}
+}
+
+func DeleteMenu() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+		menuId := c.Param("menu_id")
+		filter := bson.M{"menu_id": menuId}
+
+		result, err := menuCollection.DeleteOne(ctx, filter)
+		defer cancel()
+		if err != nil {
+			msg := fmt.Sprintf("error deleting menu")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
+			return
+		}
+
+		if result.DeletedCount == 0 {
+			c.JSON(http.StatusNotFound, gin.H{"error": "menu not found"})
+			return
+		}
+
+		defer cancel()
+		c.JSON(http.StatusOK, gin.H{"message": "menu deleted successfully"})
 	}
 }
