@@ -3,16 +3,17 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"restaurant_management_system/database"
 	"restaurant_management_system/models"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-    "go.mongodb.org/mongo-driver/bson"
 )
 
 var orderCollection *mongo.Collection = database.OpenCollection(database.Client, "order")
@@ -32,9 +33,7 @@ func GetOrders() gin.HandlerFunc {
 
         var allOrders []bson.M
         if err = result.All(ctx, &allOrders); err!=nil {
-            msg := fmt.Sprintf("error decoding orders")
-            c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
-            return
+            log.Fatal(err)
         }
 
         defer cancel()
@@ -112,13 +111,13 @@ func UpdateOrder() gin.HandlerFunc {
         var order models.Order
         var table models.Table
 
-        orderId := c.Param("order_id")
         defer cancel()
         if err := c.BindJSON(&order); err!=nil {
             c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
             return
         }
 
+        orderId := c.Param("order_id")
         filter := bson.M{"order_id": orderId}
         var updateObj primitive.D
 
@@ -145,6 +144,7 @@ func UpdateOrder() gin.HandlerFunc {
             bson.M{"$set": order},
             &opt,
         )
+        defer cancel()
         if err!= nil {
             msg := fmt.Sprintf("error updating order")
             c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
