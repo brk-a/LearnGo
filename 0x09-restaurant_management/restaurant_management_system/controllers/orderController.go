@@ -17,7 +17,6 @@ import (
 )
 
 var orderCollection *mongo.Collection = database.OpenCollection(database.Client, "order")
-var tableCollection *mongo.Collection = database.OpenCollection(database.Client, "table")
 
 func GetOrders() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -141,7 +140,7 @@ func UpdateOrder() gin.HandlerFunc {
         result, err := orderCollection.UpdateOne(
             ctx,
             filter,
-            bson.M{"$set": order},
+            bson.M{"$set": updateObj},
             &opt,
         )
         defer cancel()
