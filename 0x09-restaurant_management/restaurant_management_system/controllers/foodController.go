@@ -10,17 +10,16 @@ import (
 	"restaurant_management_system/models"
 	"strconv"
 	"time"
-
+	"github.com/go-playground/validator/v10"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"gopkg.in/bluesuncorp/validator.v5"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 var foodCollection *mongo.Collection = database.OpenCollection(database.Client, "food")
-var validate = validator.New("validate", validator.BakedInValidators)
+var validate = validator.New()
 
 func GetFoods() gin.HandlerFunc {
 	return func(c *gin.Context) {
