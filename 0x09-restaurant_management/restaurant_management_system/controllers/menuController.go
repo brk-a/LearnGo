@@ -163,7 +163,7 @@ func DeleteMenu() gin.HandlerFunc {
 		}
 
 		if result.DeletedCount == 0 {
-			c.JSON(http.StatusNotFound, gin.H{"error": "menu not found"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "menu not found"})
 			return
 		}
 
