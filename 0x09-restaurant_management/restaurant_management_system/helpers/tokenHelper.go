@@ -2,8 +2,17 @@ package helpers
 
 import()
 
-func GenerateAllTokens()(){}
+func GenerateAllTokens(
+	userEmail string,
+	userFirstName string,
+	userLastName string,
+	userId string)(
+		string, string, error Error,
+	){}
 
-func UpdateAllTokens()(){}
+func UpdateAllTokens(
+	token string,
+	refreshToken string,
+	foundUserId string)(){}
 
 func ValidateToken()(){}
