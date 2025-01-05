@@ -22,7 +22,7 @@ func GetUsers() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
 
-		result, err := userCollection.Find(context.TODO(), bson.M{})
+		_, err := userCollection.Find(context.TODO(), bson.M{})
 		defer cancel()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "error fetching users"})
@@ -55,7 +55,7 @@ func GetUsers() gin.HandlerFunc {
 		},
 		}
 
-		result, err = userCollection.Aggregate(ctx, mongo.Pipeline{
+		result, err := userCollection.Aggregate(ctx, mongo.Pipeline{
 			matchStage, projectStage,
 		})
 		defer cancel()
@@ -98,6 +98,7 @@ func SignUp() gin.HandlerFunc {
 		var user models.User
 
 		// convert JSON data coming from DB/postman to sth Go understands
+		defer cancel()
 		if err:=c.BindJSON(&user); err!=nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
