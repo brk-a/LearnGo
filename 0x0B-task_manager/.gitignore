@@ -31,3 +31,6 @@ vendor/
 
 #
 .out
+
+# logs
+*.log
