@@ -21,27 +21,19 @@ func Database() (client *mongo.Client, err error) {
 	client, err = mongo.Connect(ctx, clientOptions)
 	defer cancel()
 	if err != nil {
+		fmt.Println("error initialising DB", err)
 		log.Panic(err)
 		return nil, err
 	}
 	err = client.Ping(ctx, nil)
 	if err != nil {
+		fmt.Println("error connecting to DB", err)
 		log.Panic(err)
 		return nil, err
 	}
 
 	fmt.Println("connected to mongoDB atlas...")
 	return client, nil
-}
-
-func createMongoClient() (*mongo.Client, error) {
-	mongoClient, dbErr := Database()
-	if dbErr != nil {
-		log.Fatal("error initialising DB", dbErr)
-		return nil, dbErr
-	}
-
-	return mongoClient, nil
 }
 
 var Client, err = Database()
