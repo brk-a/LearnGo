@@ -7,13 +7,17 @@ import (
 	"os"
 	"time"
 
+	"github.com/brk-a/task_manager/utils"
+
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+
 // Database establishes a connection to the MongoDB database using the provided URI.
 // It returns a pointer to the connected client and an error if any occurs during the connection process.
 func Database() (client *mongo.Client, err error) {
+	utils.LoadEnv()
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	MONGODB_URI := os.Getenv("MONGODB_URI")
 	clientOptions := options.Client().ApplyURI(MONGODB_URI)
@@ -32,7 +36,7 @@ func Database() (client *mongo.Client, err error) {
 		return nil, err
 	}
 
-	fmt.Println("connected to mongoDB atlas...")
+	fmt.Println("connected to DB...")
 	return client, nil
 }
 
@@ -48,7 +52,7 @@ func CloseDB(client *mongo.Client) error {
 		log.Fatal(err)
 		return err
 	}
-	fmt.Println("disconnected from MongoDB Atlas...")
+	fmt.Println("disconnected from DB...")
 	return nil
 }
 
@@ -57,6 +61,6 @@ func CloseDB(client *mongo.Client) error {
 // The function also calls CloseDB to close the connection after retrieving the collection reference.
 func GetCollection(client *mongo.Client, collectionName string) *mongo.Collection {
 	var collection = client.Database("tasks").Collection(collectionName)
-	defer CloseDB(client)
+	// defer CloseDB(client)
 	return collection
 }
