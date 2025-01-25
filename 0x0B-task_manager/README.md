@@ -4,7 +4,7 @@ full-stack simple task manager app
 ---
 ##### BE
 * Go
-* Fiber &rarr; framework in Go that is the quivalent of [Express.js][def]
+* Fiber &rarr; framework in Go that is the equivalent of [Express.js][def]
 * Air &rarr; Go equivalent of [nodemon][def2]
 * MongoDB
 ---
@@ -27,7 +27,7 @@ full-stack simple task manager app
 * schedule an task
 * alert the user when an task is about to begin
 * alert the user X long before a task is about to begin
-* such other advenaced features
+* such other advanced features
 
 [def]: http://expressjs.com/
 [def2]: https://nodemon.io/
