@@ -34,3 +34,6 @@ vendor/
 
 # logs
 *.log
+
+# others
+task_manager
