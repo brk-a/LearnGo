@@ -1,0 +1,12 @@
+# compiled file
+restaurant_management_system
+
+# mod and sum files
+go.mod
+go.sum
+
+#env files
+.env
+
+#others
+*.toml
