@@ -18,7 +18,7 @@ import (
 // It returns a pointer to the connected client and an error if any occurs during the connection process.
 func Database() (client *mongo.Client, err error) {
 	utils.LoadEnv()
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	MONGODB_URI := os.Getenv("MONGODB_URI")
 	clientOptions := options.Client().ApplyURI(MONGODB_URI)
 
