@@ -1,5 +1,4 @@
 import { Flex, Spinner, Stack, Text } from "@chakra-ui/react";
-
 import TaskItem from "./TaskItem";
 import { useQuery } from "@tanstack/react-query";
 import { BASE_URL } from "../App";
