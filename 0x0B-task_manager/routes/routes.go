@@ -7,6 +7,7 @@ import (
 
 	"github.com/brk-a/task_manager/controllers"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 // Routes sets up the HTTP routes for the task manager application.
@@ -15,6 +16,10 @@ import (
 // If the PORT environment variable is not set, it defaults to 8080.
 func Routes() {
 	app := fiber.New()
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:  "http://localhost:5173",
+        AllowHeaders:   "Origin, Content-Type, Accept",
+	}))
 
 	// GET /api/v1/tasks - Retrieve all tasks
 	app.Get("/api/v1/tasks", controllers.GetTasks)
