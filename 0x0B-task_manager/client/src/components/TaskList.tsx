@@ -53,11 +53,12 @@ const TaskList = () => {
 					<img src='/go.png' alt='Go logo' width={70} height={70} />
 				</Stack>
 			)}
-			<Stack gap={3}>
+			{tasks!.length>0 ? <Stack gap={3}>
 				{tasks?.map((task) => (
 					<TaskItem key={task._id} task={task} />
 				))}
-			</Stack>
+			</Stack> : ""
+			}
 		</>
 	);
 };

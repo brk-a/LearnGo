@@ -3,7 +3,7 @@ import Navbar from "./components/Navbar";
 import TaskForm from "./components/TaskForm";
 import TaskList from "./components/TaskList";
 
-export const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:5000/api" : "/api";
+export const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:8080/api/v1" : "/api";
 
 function App() {
 	return (
