@@ -1,4 +1,4 @@
-package main
+package port_scanner
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	scanner_2 "github.com/brk-a/offensive_go/port_scanner/scanner_2"
 )
 
-func main(){
+func Main(){
 	fmt.Printf("Running single-port scanner...\n")
 	scanner_0.PortScanner_0()
 	fmt.Printf("=================================================\n")
