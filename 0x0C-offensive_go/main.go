@@ -6,6 +6,7 @@ import (
 	advanced_port_scanner "github.com/brk-a/offensive_go/advanced_port_scanner"
 	sniff_n_capture "github.com/brk-a/offensive_go/sniff_and_capture"
 	key_logger "github.com/brk-a/offensive_go/web_key_logger"
+	sub_domain_finder "github.com/brk-a/offensive_go/sub_domain_finder"
 )
 
 func main(){
@@ -14,4 +15,5 @@ func main(){
 	advanced_port_scanner.Main()
 	sniff_n_capture.Main()
 	key_logger.Main()
+	sub_domain_finder.Main()
 }
