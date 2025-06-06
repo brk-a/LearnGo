@@ -7,6 +7,7 @@ import (
 	sniff_n_capture "github.com/brk-a/offensive_go/sniff_and_capture"
 	key_logger "github.com/brk-a/offensive_go/web_key_logger"
 	sub_domain_finder "github.com/brk-a/offensive_go/sub_domain_finder"
+	net_cred_sniffer "github.com/brk-a/offensive_go/network_credentials_sniffer"
 )
 
 func main(){
@@ -16,4 +17,5 @@ func main(){
 	sniff_n_capture.Main()
 	key_logger.Main()
 	sub_domain_finder.Main()
+	net_cred_sniffer.Main()
 }
