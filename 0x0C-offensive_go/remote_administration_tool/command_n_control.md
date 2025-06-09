@@ -33,4 +33,38 @@
     * because
     * what!?
     * yes, because
-    * 
+* `embed.proto` file *viz*:
+
+    ```proto
+        syntax = "proto3"
+        package c2grpcapi
+
+        service Embed {
+            rpc GetCommand (Empty) returns (Command);
+            rpc SendCommand (Command) returns (Empty);
+        }
+
+        service Admin {
+            rpc ExecuteCommand (Command) returns (Command);
+        }
+
+        message Command {
+            String Input = 1;
+            String Output = 2;
+        }
+
+        // Empty message to use in place of null
+        message Empty {
+        }
+    ```
+
+* WTF is all this?
+    * eea...sy!
+    * `GetCommand` RPC is called from  `victim client` onto `C2 gRPC server`. it is a polling command: said server polls said client as soon as client establishes a connects with server
+        - victim client to C2 server: Hi. Do you have any commands I should run?
+        - C2 server to victim client: No.
+        - victim client to C2 server: *(a few seconds later)* How about now?
+        - C2 server to victim client: Yes. Here... `sudo ...`
+        - *(this goes on ad infinitum)*
+    * message `Command` is what `GetCommand` returns. contains the commands that `victim client` will execute. `Input` field is where the command actually resides
+    * `SendResult` RPC is used to send the result of the commands executed by `victim client` to `C2 gRPC server`
