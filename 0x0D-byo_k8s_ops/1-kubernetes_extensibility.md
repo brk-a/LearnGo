@@ -278,4 +278,305 @@
     kubectl get mysqlcluster
 ```
 
+## 1.  Advanced Extensibility Patterns
+
+### 1.1. Aggregated APIs & Custom Schedulers
+
+#### 1.1.1. Aggregated API Servers
+
+* **Aggregated APIs** proxy external API servers through kube-apiserver:
+
+```yaml
+    # APIService registration
+    apiVersion: apiregistration.k8s.io/v1
+    kind: APIService
+    metadata:
+    name: v1beta1.external-metrics.k8s.io
+    spec:
+    group: external-metrics.k8s.io
+    version: v1beta1
+    groupPriorityMinimum: 100
+    versionPriority: 100
+    service:
+        name: prometheus-adapter
+        namespace: monitoring
+    caBundle: <base64-ca-cert>
+```
+
+* **Architecture**:
+
+```mermaid
+    graph LR
+        Client[kubectl] --> KubeAPIServer[Kube-APIServer]
+        KubeAPIServer -->|Proxy /apis/external-metrics.k8s.io| AggAPI[Aggregated API Server]
+        AggAPI -->|Custom logic| Backend[Prometheus/Custom]
+        
+        subgraph "Extends core API"
+            ExternalMetricValue[ExternalMetricValue<br/>Used by HPA]
+        end
+```
+
+* **Nairobi use case**: Community metrics API for ALX/Holberton hackathon leaderboards.
+
+```go
+    // Custom API for hackathon metrics
+    // /apis/metrics.alx.ke/v1alpha1/hackathonleaderboards
+    type HackathonLeaderboardSpec struct {
+        RepoURL   string `json:"repoUrl"`
+        Metric    string `json:"metric"`  // stars, forks, contributors
+        Namespace string `json:"namespace"`
+    }
+
+    type HackathonLeaderboardStatus struct {
+        Stars        int    `json:"stars"`
+        Contributors []User `json:"contributors"`
+        Rank         int    `json:"rank"`
+    }
+```
+
+#### 1.1.2. Custom Schedulers
+
+* **Custom schedulers** extend pod placement logic:
+
+```yaml
+    # Pod with custom scheduler
+    apiVersion: v1
+    kind: Pod
+    metadata:
+    name: nairobi-critical-workload
+    spec:
+    schedulerName: geo-aware-scheduler  # Custom!
+    containers: [...]
+```
+
+* **Custom scheduler code** (Go):
+
+```go
+    // Nairobi geo-aware scheduler
+    type GeoAwareScheduler struct {
+        client dynamic.Interface
+        geodb  *maxminddb.Reader  // IP → Nairobi/London
+    }
+
+    func (s *GeoAwareScheduler) Schedule(ctx context.Context, pod *v1.Pod) {
+        // Custom predicates
+        if pod.Labels["priority"] == "nairobi-critical" {
+            nodes := s.nodesInGeo("Africa/Nairobi")
+            if len(nodes) > 0 {
+                s.bindPod(pod, nodes[0])  // Prefer local nodes
+                return
+            }
+        }
+        
+        // Fallback to default scheduler
+        defaultSchedule(ctx, pod)
+    }
+```
+
+### 1.2. IDP Case Study: Nairobi Tech Community Platform
+
+* **Scenario**: ALX/Holberton alumni platform for hackathons, workshops, and project deployments.
+
+* **Architecture**:
+
+```mermaid
+    graph TB
+        Alumni[ALX/Holberton Alumni] -->|GitHub PR| Backstage[Backstage Portal<br/>Nairobi IDP]
+        Backstage -->|Scaffold| ArgoCD[ArgoCD GitOps]
+        ArgoCD -->|App-of-Apps| Operators[Community Operators]
+        
+        subgraph "Custom Operators"
+            HackathonOp[Hackathon Leaderboard<br/>GitHub stars → HPA]
+            WorkshopOp[Workshop Environment<br/>Temporary namespaces]
+            ProjectOp[Project Deployment<br/>CI/CD pipelines]
+        end
+        
+        Operators --> K8s[Nairobi EKS/GKE Cluster]
+        K8s -->|CNI=Calico| Network[Network Policy<br/>Nairobi IP whitelist]
+```
+
+* **CRDs for community**:
+
+```yaml
+    # Hackathon leaderboard auto-scaling
+    apiVersion: metrics.alx.ke/v1alpha1
+    kind: HackathonLeaderboard
+    metadata:
+    name: ke-hackathon-2026
+    spec:
+    repo: "alx-africa/ke-hackathon-2026"
+    metric: "github-stars-per-hour"
+    minReplicas: 2
+    maxReplicas: 20
+    targetMetric: 100  # Stars/hour → HPA
+    ---
+    # Temporary workshop environment
+    apiVersion: workshop.alx.ke/v1alpha1
+    kind: WorkshopEnvironment
+    metadata:
+    name: python-data-2026
+    spec:
+    template: "python-django"
+    duration: "72h"
+    participants: 50
+    resources:
+        cpu: "500m"
+        memory: "1Gi"
+```
+
+* **Platform policies** (Gatekeeper OPA):
+
+```rego
+    # Nairobi IP whitelist
+    package platform.nairobi
+
+    default allow = false
+
+    allow {
+        input.request.userInfo.clientIP[_] == "197.234.219.0/24"  # Safaricom
+        or input.request.userInfo.clientIP[_] == "102.88.0.0/16"   # Kenya ISPs
+    }
+
+    deny[msg] {
+        input.request.kind.kind == "Deployment"
+        not input.request.userInfo.username == "alx-admin@ke"
+        msg := "Only ALX admins can deploy"
+    }
+```
+
+* **Metrics dashboard** (community KPIs):
+
+| Metric | Source | Purpose |
+|--------|--------|---------|
+| `hackathon_stars_total` | GitHub API + Prometheus | Leaderboard |
+| `workshop_active_users` | Workshop CR status | Capacity planning |
+| `nairobi_pod_locality` | Custom scheduler | Geo-preference |
+
+### 1.3. Kubebuilder Hands-On: MySQL Operator for Nairobi
+
+* **Complete bootstrap**:
+
+```bash
+    # 1. Prerequisites
+    go install sigs.k8s.io/kubebuilder@latest
+    mkdir nairobi-mysql-op && cd nairobi-mysql-op
+
+    # 2. Init + CRD
+    kubebuilder init --domain alx.ke --repo nairobi-mysql
+    kubebuilder create api --group mysql --version v1 --kind MySQLCluster --resource --controller
+
+    # 3. Edit types (api/v1/mysqlcluster_types.go)
+```
+
+* **Custom MySQLCluster spec** (Nairobi-tuned):
+
+```go
+    // api/v1/mysqlcluster_types.go
+    type MySQLClusterSpec struct {
+        Replicas      *int32 `json:"replicas,omitempty"`
+        Version       string `json:"version"`
+        Storage       StorageSpec `json:"storage"`
+        Backup        BackupSpec `json:"backup,omitempty"`
+        CloudProvider string    `json:"cloudProvider,omitempty"`  // aws/azure/gcp
+        GeoPreference string    `json:"geoPreference,omitempty"`  // nairobi/london
+    }
+
+    type StorageSpec struct {
+        Size         string `json:"size"`
+        StorageClass string `json:"storageClass"`
+    }
+
+    type BackupSpec struct {
+        Schedule string `json:"schedule"`
+        S3Bucket string `json:"s3Bucket,omitempty"`  # Nairobi S3
+    }
+```
+
+* **Controller implementation** (controllers/mysqlcluster_controller.go):
+
+```go
+    func (r *MySQLClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) {
+        cluster := &alxkev1.MySQLCluster{}
+        if err := r.Get(ctx, req.NamespacedName, cluster); err != nil { return }
+        
+        // Nairobi geo-aware storage
+        storageClass := r.geoAwareStorageClass(cluster.Spec.GeoPreference)
+        
+        // StatefulSet (idempotent)
+        sts := r.generateStatefulSet(cluster, storageClass)
+        if err := r.reconcileResource(ctx, sts); err != nil { return }
+        
+        // Headless service
+        svc := r.generateHeadlessService(cluster)
+        if err := r.reconcileResource(ctx, svc); err != nil { return }
+        
+        // Backup cronjob (S3)
+        if cluster.Spec.Backup.S3Bucket != "" {
+            cron := r.generateBackupJob(cluster)
+            r.reconcileResource(ctx, cron)
+        }
+        
+        // Status update
+        cluster.Status.Replicas = sts.Status.Replicas
+        r.Status().Update(ctx, cluster)
+    }
+
+    func (r *MySQLClusterReconciler) geoAwareStorageClass(geo string) string {
+        switch geo {
+        case "nairobi":
+            return "ebs-gp3-nairobi"  // Local AZ
+        default:
+            return "gp3"
+        }
+    }
+```
+
+* **Deploy to cluster**:
+
+```bash
+    # Generate + install
+    make manifests
+    make install  # CRDs only
+
+    # Run locally (port-forward apiserver)
+    make run
+
+    # Deploy operator
+    kubectl apply -f config/manager
+
+    # Test workload
+    kubectl apply -f config/samples/mysql_v1_mysqlcluster_nairobi.yaml
+```
+
+* **Sample CR** (Nairobi production):
+
+```yaml
+    apiVersion: mysql.alx.ke/v1
+    kind: MySQLCluster
+    metadata:
+    name: alx-community-db
+    spec:
+    replicas: 3
+    version: "8.0.35"
+    storage:
+        size: "50Gi"
+        storageClass: "ebs-gp3-nairobi"
+    backup:
+        schedule: "0 3 * * *"  # 3AM EAT
+        s3Bucket: "s3://alx-nairobi-backups"
+    cloudProvider: "aws"
+    geoPreference: "nairobi"
+```
+
+* **Verification**:
+
+```bash
+    kubectl get mysqlcluster alx-community-db -o yaml
+    # Status: replicas: 3/3, phase: Running, backups: active
+```
+
+
+
+
+
 </div>
