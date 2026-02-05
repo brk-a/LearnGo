@@ -32,7 +32,7 @@
     * Custom Resource Definitions (CRDs) in Action
     * Running the Operator Locally
     * AWS SDK Integration in Go
-    * Using Finalizers for Cleanup Logic
+    * Using Finalisers for Cleanup Logic
     * Creating EC2 Instances on AWS via the Operator
     * Implementing Waiters for Instance State (Running/Terminated)
 * advanced internals & dev
